@@ -1,8 +1,9 @@
 package bep;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by kiyer on 7/24/16.
@@ -10,12 +11,14 @@ import java.util.List;
  */
 public class NonTerminal extends Symbol
 {
-    private final List<Symbol> symbolSequence = new ArrayList<Symbol>();
+    private final LinkedList<Symbol> symbolSequence = new LinkedList<Symbol>();
+    private final ListIterator<Symbol> iterator;
 
     public NonTerminal(List<Symbol> symbolSequence)
     {
         super();
         Collections.copy(this.symbolSequence, symbolSequence);
+        iterator = symbolSequence.listIterator();
     }
 
     public void handleEventInner(Event event)
