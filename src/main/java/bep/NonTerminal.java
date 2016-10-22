@@ -14,15 +14,37 @@ public class NonTerminal extends Symbol
     private final LinkedList<Symbol> symbolSequence = new LinkedList<Symbol>();
     private final ListIterator<Symbol> iterator;
 
-    public NonTerminal(List<Symbol> symbolSequence)
+    /**
+     * denotes the start and the end of the input sequence which this NonTerminal matches
+     */
+    int start, end, inputPos = 0;
+
+    public NonTerminal(String name, List<Symbol> symbolSequence)
     {
-        super();
+        super(name);
         Collections.copy(this.symbolSequence, symbolSequence);
         iterator = symbolSequence.listIterator();
     }
 
-    public void handleEventInner(Event event)
+    @Override
+    protected boolean canHandle(Event event)
     {
+        return super.canHandle(event) && (status == Status.ACTIVE) && (inputPos + 1) == event.getStartPosition();
+    }
 
+    @Override
+    protected void handleEventInner(Event event)
+    {
+        Symbol nextSymbol = iterator.next();
+        if (event.getSymbol().equals(nextSymbol))
+        {
+            if (!iterator.hasNext())
+            {
+                end = inputPos;
+                status = Status.SUCCESS;
+                Event newEvent = new Event(this, start, end);
+                emit(event);
+            }
+        }
     }
 }
