@@ -32,7 +32,7 @@ public class Terminal extends Symbol
         return charToTerminalMap.get(c);
     }
 
-    protected void handleEventInner(Event event)
+    protected boolean handleEventInner(Event event)
     {
 
     }

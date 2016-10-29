@@ -3,7 +3,6 @@ package bep;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Created by kiyer on 7/24/16.
@@ -12,18 +11,16 @@ import java.util.ListIterator;
 public class NonTerminal extends Symbol
 {
     private final LinkedList<Symbol> symbolSequence = new LinkedList<Symbol>();
-    private final ListIterator<Symbol> iterator;
 
-    /**
-     * denotes the start and the end of the input sequence which this NonTerminal matches
-     */
-    int start, end, inputPos = 0;
 
-    public NonTerminal(String name, List<Symbol> symbolSequence)
+    public NonTerminal(String name, int start, List<Symbol> symbolSequence)
     {
-        super(name);
+        super(name, start);
+        if ((symbolSequence == null) || symbolSequence.isEmpty())
+        {
+            throw new IllegalArgumentException("List of symbols cannot be null or empty");
+        }
         Collections.copy(this.symbolSequence, symbolSequence);
-        iterator = symbolSequence.listIterator();
     }
 
     @Override
@@ -33,18 +30,26 @@ public class NonTerminal extends Symbol
     }
 
     @Override
-    protected void handleEventInner(Event event)
+    protected boolean handleEventInner(Event event)
     {
-        Symbol nextSymbol = iterator.next();
+        boolean eventAbsorbed = false;
+        Symbol nextSymbol = symbolSequence.get(inputPos + 1);
         if (event.getSymbol().equals(nextSymbol))
         {
-            if (!iterator.hasNext())
+            inputPos++;
+            if (symbolSequence.size() <= (inputPos + 1))
             {
                 end = inputPos;
                 status = Status.SUCCESS;
                 Event newEvent = new Event(this, start, end);
                 emit(event);
             }
+            eventAbsorbed = true;
         }
+        else
+        {
+            eventAbsorbed = false;
+        }
+        return eventAbsorbed;
     }
 }
