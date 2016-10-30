@@ -1,6 +1,5 @@
 package bep;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -10,34 +9,34 @@ import java.util.Queue;
  */
 public class GrammarProcessor
 {
-    private Queue eventQueue;
-    private List<EventHandler> eventHandlers;
+    private Queue<Event> eventQueue;
+    private List<Rule> baseRules;
 
-    public void addHandler(RuleHandler ruleHandler)
+    public void addRule(Rule rule)
     {
-        assert (ruleHandler != null);
-        eventHandlers.add(ruleHandler);
+        assert (rule != null);
+        baseRules.add(rule);
     }
 
     public GrammarProcessor()
     {
-        List<EventHandler> eventHandlers = new LinkedList<EventHandler>();
+        List<BaseRule> baseRules = new LinkedList<BaseRule>();
     }
 
     public static void main(String[] args)
     {
         GrammarProcessor grammarProcessor = new GrammarProcessor();
-        initializeEventHandlers(grammarProcessor);
+        initializeRules(grammarProcessor);
     }
 
-    private static void initializeEventHandlers(GrammarProcessor grammarProcessor)
+    private static void initializeRules(GrammarProcessor grammarProcessor)
     {
         /*
          Will test using following grammar used for simple arithmetic expressions:
          <P> ::= <S>      -- the start rule, rule #1
          <S> ::= <S> "+" <M> | <M> -- rule #2
          <M> ::= <M> "*" <T> | <T> -- rule #3
-         <T> ::= "1" | "2" | "3" | "4" -- rule #4
+         <T> ::= "0" | "1" | "2" | "3" | "4" -- rule #4
          */
 
 //        add rule #4
@@ -45,11 +44,11 @@ public class GrammarProcessor
         for (int i = 0; i <= lastNum; i++)
         {
             Character numberChar = Character.forDigit(i, 10);
-            Symbol charSymbol = new Terminal(numberChar);
-            RuleHandler ruleHandler = new RuleHandler("T", Collections.singletonList(charSymbol));
-            grammarProcessor.addHandler(ruleHandler);
+            grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("T").addRhsFragment(numberChar.toString(), Terminal.class).build());
         }
 //        add rule #3
-        Symbol mSymbol = new NonTerminal()
+        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("M").addRhsFragment("T", NonTerminal.class).build());
+        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("M").addRhsFragment("T", NonTerminal.class).build());
+
     }
 }

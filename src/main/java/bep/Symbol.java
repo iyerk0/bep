@@ -1,63 +1,55 @@
 package bep;
 
-import static bep.util.ValidationUtils.isNull;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by kiyer on 7/24/16.
  * A class that represents a Terminal or Non-Terminal Symbol
  */
-public abstract class Symbol implements EventHandler
+public abstract class Symbol
 {
-    private final String name;
-    protected Status status = Status.INACTIVE;
-    /**
-     * denotes the start and the end of the input sequence which this NonTerminal matches
-     */
-    int start, end, inputPos = -1;
+    private static Map<String, Symbol> symbolCollection = new HashMap<>();
 
-    public enum Status
+    public String getName()
     {
-        INACTIVE, ACTIVE, SUCCESS, FAILED
+        return name;
     }
 
-    protected Symbol(String name, int start)
+    private final String name;
+
+    public static Symbol getSymbolInstanceFor(String name, Class<? extends Symbol> symbolClass)
     {
         if (name == null || name.isEmpty())
         {
             throw new IllegalArgumentException("Must provide a valid value for Symbol name");
         }
-        if ((start < 0))
+        Symbol symbol = symbolCollection.get(name);
+        if (symbol == null)
         {
-            throw new IllegalArgumentException("Start cannot be less than 0");
+            try
+            {
+                Constructor<? extends Symbol> symbolConstructor = symbolClass.getConstructor(String.class);
+                symbol = symbolConstructor.newInstance(name);
+                symbolCollection.put(name, symbol);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace(); //TODO print to logs instead
+            }
         }
+        if (!symbol.getClass().isAssignableFrom(symbolClass))
+            throw new IllegalArgumentException(
+                String.format("There already exists an instance with symbol: %s. Requested type: %s, Actual type: %s", symbol.getName(),
+                    symbolClass, symbol.getClass().getName()));
+        return symbol;
+    }
+
+    protected Symbol(String name)
+    {
         this.name = name;
-        this.start = start;
-        this.end = start;
-        this.inputPos = start;
-        this.status = Status.ACTIVE;
     }
-
-    protected boolean canHandle(Event event)
-    {
-        return (!isNull(event) && event.getSymbol().getClass().isAssignableFrom(getClass()));
-    }
-
-    public boolean handle(Event event)
-    {
-        if (canHandle(event))
-        {
-            return handleEventInner(event);
-        }
-        return false;
-    }
-
-    /**
-     * returns  true if this particular Symbol/Rule was able to "absorb" the Symbol wrapped by the event
-     *
-     * @param event
-     * @return
-     */
-    protected abstract boolean handleEventInner(Event event);
 
     @Override
     public boolean equals(Object symbol)
@@ -68,10 +60,4 @@ public abstract class Symbol implements EventHandler
         if (name.equals(((Symbol) symbol).name)) return true;
         return false;
     }
-
-    protected void emit(Event event)
-    {
-        //TODO: Post to event queue
-    }
-
 }
