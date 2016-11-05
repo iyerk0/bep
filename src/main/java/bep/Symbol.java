@@ -19,7 +19,7 @@ public abstract class Symbol
 
     private final String name;
 
-    public static Symbol getSymbolInstanceFor(String name, Class<? extends Symbol> symbolClass)
+    public static <S extends Symbol> S getSymbolInstanceFor(String name, Class<S> symbolClass)
     {
         if (name == null || name.isEmpty())
         {
@@ -43,10 +43,10 @@ public abstract class Symbol
             throw new IllegalArgumentException(
                 String.format("There already exists an instance with symbol: %s. Requested type: %s, Actual type: %s", symbol.getName(),
                     symbolClass, symbol.getClass().getName()));
-        return symbol;
+        return symbolClass.cast(symbol);
     }
 
-    protected Symbol(String name)
+    public Symbol(String name)
     {
         this.name = name;
     }

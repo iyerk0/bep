@@ -6,7 +6,7 @@ package bep;
  */
 public class NonTerminal extends Symbol
 {
-    protected NonTerminal(String name)
+    public NonTerminal(String name)
     {
         super(name);
     }

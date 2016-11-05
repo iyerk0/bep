@@ -6,7 +6,7 @@ package bep;
  */
 public class Terminal extends Symbol
 {
-    protected Terminal(String name)
+    public Terminal(String name)
     {
         super(name);
     }

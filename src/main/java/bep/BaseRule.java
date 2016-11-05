@@ -11,15 +11,16 @@ import static bep.util.ValidationUtils.isNull;
  */
 public class BaseRule extends Rule
 {
-    private BaseRule(Symbol lhs, List<Symbol> rhs)
+
+    private BaseRule(NonTerminal lhs, List<Symbol> rhs, GrammarProcessor processor)
     {
-        super(lhs, rhs);
+        super(lhs, rhs, processor);
     }
 
     @Override
     protected boolean canHandle(Event event)
     {
-        return (!isNull(event) && event.getSymbol().getClass().isAssignableFrom(getClass()));
+        return (!isNull(event) && event.getLhs().getClass().isAssignableFrom(getClass()));
     }
 
     @Override
@@ -28,16 +29,14 @@ public class BaseRule extends Rule
         boolean eventAbsorbed = super.handleEvent(event);
         if (eventAbsorbed)
         {
-            addRule(new RuleBuilder().addLhs(lhs).addRhsSequence(rhs));
+            addRule(new RuleBuilder().addLhs(lhs).addRhsSequence(rhs).addStart(1).build());
         }
+        inputPos = start;
+        return eventAbsorbed;
     }
 
-    public static class BaseRuleBuilder extends RuleBuilder
+    private void addRule(Rule rule)
     {
-        @Override
-        public BaseRule build()
-        {
-            return new BaseRule(this.lhs, this.rhs);
-        }
+        processor.addRule(rule);
     }
 }

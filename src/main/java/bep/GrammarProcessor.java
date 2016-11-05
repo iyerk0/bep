@@ -20,7 +20,7 @@ public class GrammarProcessor
 
     public GrammarProcessor()
     {
-        List<BaseRule> baseRules = new LinkedList<BaseRule>();
+        baseRules = new LinkedList<>();
     }
 
     public static void main(String[] args)
@@ -39,16 +39,24 @@ public class GrammarProcessor
          <T> ::= "0" | "1" | "2" | "3" | "4" -- rule #4
          */
 
-//        add rule #4
+//      add rule #4
         int lastNum = 4;
         for (int i = 0; i <= lastNum; i++)
         {
             Character numberChar = Character.forDigit(i, 10);
-            grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("T").addRhsFragment(numberChar.toString(), Terminal.class).build());
+            grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("T").addRhsFragment(numberChar.toString(), Terminal.class).addProcessor(grammarProcessor).build());
         }
-//        add rule #3
-        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("M").addRhsFragment("T", NonTerminal.class).build());
-        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("M").addRhsFragment("T", NonTerminal.class).build());
+//      add rule #3
+        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("M").addRhsFragment("T", NonTerminal.class).addProcessor(grammarProcessor).build());
+        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("M").addRhsFragment("M", NonTerminal.class).addRhsFragment("*", Terminal.class).addRhsFragment("T", NonTerminal.class).addProcessor(grammarProcessor).build());
+
+//      add rule #2
+        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("S").addRhsFragment("M", NonTerminal.class).addProcessor(grammarProcessor).build());
+        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("S").addRhsFragment("S", NonTerminal.class).addRhsFragment("+", Terminal.class).addRhsFragment("M", NonTerminal.class).addProcessor(grammarProcessor).build());
+
+//      add rule #1
+        grammarProcessor.addRule(new BaseRule.RuleBuilder().addLhs("P").addRhsFragment("S", NonTerminal.class).addProcessor(grammarProcessor).build());
+
 
     }
 }
